@@ -1,0 +1,125 @@
+/* ==========================================================================
+   Landing Page
+   ========================================================================== */
+
+@font-face {
+    font-family: 'Gill Sans MT';
+    src: url('fonts/GILMT.eot');
+    src: local('☺'), url('fonts/GILMT.woff') format('woff'), url('fonts/GILMT.ttf') format('truetype'), url('fonts/GILMT.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* ==========================================================================
+   Landing Page
+   ========================================================================== */
+
+body {
+    position: relative;
+    font-family: 'Gill Sans MT', 'sans-serif';
+    padding-top: 160px;
+    font-size: 20px;
+}
+
+#logo {
+    background: url(../img/logo.png) no-repeat center center;
+    height: 63px;
+    text-indent: -9999px;
+    overflow: hidden;
+}
+
+.right-container h2 {
+    margin-top: 33px;
+    margin-bottom: 39px;
+}
+
+h2, .right-container p {
+    font-size: 20px;
+    color: rgba(192, 192, 192, 0.69);
+}
+
+.container {
+    margin: 0 auto;
+    width: 860px;
+}
+
+.left-container, .right-container {
+    text-align: center;
+}
+
+.left-container {
+    float: left;
+    width: 50%;
+}
+
+.right-container {
+    margin-left: 40px;
+    float: left;
+    width: 44%;
+}
+
+q {
+    font-size: 24px;
+}
+
+ol {
+    counter-reset: item;
+    list-style-type: none;
+}
+
+ol li:before {
+    z-index: -1;
+    content: counter(item) '  ';
+    counter-increment: item;
+    width: 29px;
+    height: 29px;
+    display: block;
+    position: absolute;
+    left: -30px;
+    top: 9px;
+    color: white;
+}
+
+ol li {
+    margin-bottom: 10px;
+    z-index: 5;
+    position: relative;
+    list-style-position: outside;
+}
+
+.item-1:before {
+    background: #ff0000;
+}
+
+.item-2:before {
+    background: #5bc0be;
+}
+
+.item-3:before {
+    background: #dedb43;
+}
+
+#start-meeting {
+    text-decoration: none;
+    margin: 0 auto;
+    color: white;
+    font-style: bold;
+    background: #231f20;
+    display: block;
+    line-height: 48px;
+    width: 79%;
+}
+
+#start-meeting:hover {
+    background: #ff4636;
+}
+
+/* ==========================================================================
+   Form
+   ========================================================================== */
+
+.right-container input {
+    padding: 8px;
+    width: 73%
+}
+

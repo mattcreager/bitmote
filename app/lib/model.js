@@ -1,5 +1,6 @@
 var events = require('events'),
-	util   = require('util')
+	util   = require('util'),
+	_	   = require('lodash')
 
 exports = module.exports = Model
 
@@ -9,12 +10,14 @@ function Model () {
 
 	var self = this
 
-	this.generateUID = function () {
+	this.generateUID = function (length) {
+
+		var length = _.isUndefined(length) ? 7 : length
 	    
 	    var uid 	 = '',
 			possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
-	    for ( var i = 0; i < 7; i++ ) {
+	    for ( var i = 0; i < length; i++ ) {
 	        uid += possible.charAt(Math.floor(Math.random() * possible.length))
 	    }
 

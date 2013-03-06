@@ -1,2 +1,3 @@
 
-exports.home = require('./home.js');
+exports.home = require('./home')
+exports.meeting = require('./meeting')

@@ -21,8 +21,9 @@ function Meeting (attributes, uid) {
 	Model.call(this)
 
 	var self = this,
+		attributes = _.isEmpty(attributes) ? {} : attributes
 		defaults = {
-			host: 'blah dee dah',
+			host: this.generateUID(11),
 			subject: 'A Meeting with no Subject',
 			started: moment().toJSON()
 		}
@@ -34,7 +35,7 @@ function Meeting (attributes, uid) {
 	this.save = function () {
 		console.log(self.props)
 		console.log(self.id)
-		//client.HMSET('meeting:' + self.id, self.props)
+		client.HMSET('meeting:' + self.id, self.props)
 
 		self.emit('model:saved', 'hello world')
 	}
@@ -49,9 +50,9 @@ function Meeting (attributes, uid) {
 util.inherits(Meeting, Model)
 
 _.assign(Meeting, {
-	fetch : function(uid, callback) {
+	fetch : function(id, callback) {
 		console.log('fetching')
-		client.hgetall("m_SRX8jw7", function (err, attributes) {
+		client.hgetall('meeting:' + id, function (err, attributes) {
 			console.log('below is attributes')
 		    console.dir(attributes);
 		    attributes.start = moment(attributes.started)

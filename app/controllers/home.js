@@ -1,6 +1,11 @@
 var models = require('../models')
 
-exports.index = function (req, res, next) {
+
+exports.landing = function (req, res) {
+	res.render('landing')
+}
+
+exports.blah = function (req, res, next) {
 	var user = new models.User()
 
 	user.on('model:saved', function() { console.log('woot')})
@@ -17,7 +22,7 @@ exports.index = function (req, res, next) {
 	//var meeting = new models.Meeting({subject: 'Awesome'})
 	//meeting.save()
 	//meeting.get()
-	res.render('home')
+	res.render('home', { layout: false })
 }
 
 // Does a meeting exist
