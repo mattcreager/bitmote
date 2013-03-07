@@ -1,50 +1,63 @@
-var Model = require('../lib/model.js'),
-	util  = require('util'),
-	_	  = require('lodash'),
-	moment = require('moment')
+
+/**
+ * Module dependencies
+ */
+
+var Model = require('../lib/model.js')
+   ,util  = require('util')
+   ,_     = require('lodash')
+   ,moment = require('moment')
+
+/**
+ * Export Our User Model Contructor
+ */
 
 exports = module.exports = User
 
+/**
+ * User Model Constructor
+ * @param {Object} Attributes
+ * @param {String} UID
+ */
+
 function User (attributes, uid) {
 
-	Model.call(this)
+    // Super Constructor
+    Model.call(this)
 
-	var self = this,
-		attributes = _.isEmpty(attributes) ? {} : attributes
-		defaults = {
-			name: '',
-			email: ''
-		}
+    // Local references
+    var self = this,
+        attributes = _.isEmpty(attributes) ? {} : attributes,
+        defaults = { name: '', email: '' }
 
+    // Merge supplied attributes with User defaults
+    self.props = _.defaults(attributes, defaults)
 
-	self.props = _.defaults(attributes, defaults)
-	self.id = self.props.id = uid || this.generateUID(11)
+    // Save mutiple references to the User ID
+    self.id = self.props.id = uid || this.genHash(11)
 
-	this.set  = function (attributes) {
-        self.props = _.defaults(attributes, self.props)
-        return self
+    /**
+     * Save the user Model
+     * TODO:  Refactor me oh please god refactor me
+     */
+
+    this.save = function () {
+        var props = _.omit(self.props, ['id', 'temp_id'])
+        self.redis.HMSET('user:' + self.id, props)
+        self.emit('user:updated', self)
     }
 
-	this.save = function () {
-		var props = _.omit(self.props, ['id', 'temp_id'])
-		self.redis.HMSET('user:' + self.id, props)
-		self.emit('user:updated', self)
-	}
-
-	this.get = function (attribute, callback) {
-		var callback = _.isFunction(attribute) ? attribute : callback
-		var attr 	 = _.isEmpty(attribute) ? self.props : self.props[attribute]
-		callback(attr)
-	}
 }
 
+// Inherit from our base Model
 util.inherits(User, Model)
 
+// User Factory
 _.assign(User, {
-	fetch : function(id, callback) {
-		console.log('Fetching User with ID ' + id + ' from Redis')
-		Model.redis.hgetall('user:' + id, function (err, attributes) {
-		    callback(null, new User(attributes, id))
-		})
-	}
+    fetch : function (id, callback) {
+        console.log('Fetching User with ID ' + id + ' from Redis')
+        Model.redis.hgetall('user:' + id, function (err, attributes) {
+            callback(null, new User(attributes, id))
+        })
+    }
 })

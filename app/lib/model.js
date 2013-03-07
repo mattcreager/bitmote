@@ -1,59 +1,125 @@
+
+/**
+ * Module dependencies
+ */
+
 var events = require('events')
    ,util   = require('util')
-   ,_	   = require('lodash')
+   ,_      = require('lodash')
    ,redis  = require('redis')
 
-var client = redis.createClient()
-
-client.on("error", function (err) {
-    console.error("Redis experienced the following connection error: " + err)
-})
-
-client.on("ready", function() {
-    console.info('Redis is ready to kick some ass')
-})
+/**
+ * Export Our Base Model Contructor
+ */
 
 exports = module.exports = Model
 
+
+// Connect to Redis
+var client = redis.createClient()
+    
+    client.on("error", function (err) {
+        console.error("Redis experienced the following connection error: " + err)
+    })
+
+    client.on("ready", function() {
+        console.info('Redis is ready to kick some ass')
+    })
+
+
+/**
+ * Model Constructor
+ *
+ * Includes a variety of helpful abstractions
+ */
+
 function Model () {
 
-	events.EventEmitter.call(this)
+    // Super constuctor
+    events.EventEmitter.call(this)
 
-	var self = this
+    console.log(arguments)
 
-    self.redis = client
+    // Local references
+    var self       = this
+        self.redis = client
+
+    /**
+     * UID Existence Check
+     */
+
+    this.isNew = function () {
+        return _.isUndefined(self.id) ? true : false
+    }
+
+    /**
+     * Update the properties of a Model
+     * @param {Object} Attributes
+     */
+ 
+    this.set  = function (attributes) {
+        self.props = _.defaults(attributes, self.props)
+        return self
+    }
+
+    /**
+     * Return a Model attribute
+     * @param {Object} Attributes
+     */
+
+    this.get = function (attribute) {
+
+        if ( _.isUndefined(attribute) ) {
+            return self.props
+        } else {
+            return self.props[attribute]
+        }
+    }
+
+    /**
+     * Redis helps us generate a UID
+     * @param {String}   key : example 'mote:uid'
+     * @param {Function} callback
+     */
 
     this.genID = function (key, callback) {
-        client.incr(key, function (err, new_id) {
+        client.incr(key, function (err, newId) {
             if (err) {
-                console.error(err)
+                console.error('An error was encountered trying to generate an ID: %j', err)
             } else {
-                callback(null, new_id)
+                callback(null, newId)
             }
         })
     }
 
-	this.generateUID = function (length) {
+    /**
+     * Generate a Hash (example: Q4LVeuc)
+     * @param {Int} Length
+     */
 
-		var length = _.isUndefined(length) ? 7 : length
+    this.genHash = function (length) {
+        var length   = _.isUndefined(length) ? 7 : length,
+            hash     = '',
+            possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
-	    var uid 	 = '',
-			possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+        for ( var i = 0; i < length; i++ ) {
+            hash += possible.charAt(Math.floor(Math.random() * possible.length))
+        }
 
-	    for ( var i = 0; i < length; i++ ) {
-	        uid += possible.charAt(Math.floor(Math.random() * possible.length))
-	    }
+        return hash
+    }
 
-	    return uid
-	}
+    /**
+     * Generate a warning on save
+     */
 
-	this.save = function () {
-		console.warning('Child models must override this.save')
-	}
+    this.save = function () {
+        console.warning('Child models must override this.save')
+    }
 }
 
-_.assign(Model, {
-    redis : client
-})
+// Easy access to redis
+_.assign(Model, { redis : client })
 
+// EventEmitter inheritance
 util.inherits(Model, events.EventEmitter)

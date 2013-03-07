@@ -1,78 +1,99 @@
-var Model = require('../lib/model.js'),
-	util  = require('util'),
-	_	  = require('lodash'),
-	moment = require('moment'),
-    async = require('async')
+
+/**
+ * Module dependencies
+ */
+
+var Model = require('../lib/model.js')
+   ,util  = require('util')
+   ,_     = require('lodash')
+   ,moment = require('moment')
+   ,async = require('async')
+
+/**
+ * Export Our Mote Contructor
+ */
 
 exports = module.exports = Mote
 
+
+/**
+ * Meeting Constructor (Look Familiar?)
+ * @param {Object} Attributes
+ * @param {String} UID
+ */
+
 function Mote (attributes, uid) {
+
+    // Super Constructor
     Model.call(this)
 
-    var self = this,
-        attributes = _.isEmpty(attributes) ? {} : attributes
-        defaults = {
+    // Local references
+    var self       = this,
+        attributes = _.isEmpty(attributes) ? {} : attributes,
+        defaults   = {
             meeting_id: '', // foreign key meeting id
             created: moment().toJSON(),
             body: '',    // message body
             type: '' // action, info or decision
         }
 
+    // Merge supplied attributes with User defaults
     self.props = _.defaults(attributes, defaults)
 
+    // Save mutiple references to the Meeting ID
     self.id = self.props.id = uid || undefined
 
-    this.set  = function (attributes) {
-        self.props = _.defaults(attributes, self.props)
-        return self
-    }
+    /**
+     * Save the Mote Model
+     * TODO: Yup needs a refactor too
+     */
 
     this.save = function () {
 
-        var motelikenew = _.isUndefined(self.id) ? true : false
+        // Store the status of this Mote
+        var isNew = self.isNew()
 
         async.waterfall([
-            function (callback) {
 
-                if ( motelikenew ) { //need an isNew function or something
-                    self.genID('mote:id', callback) //returns a Unique ID
+            /**
+             * Generate or return the UID
+             * @param {Function} callback
+             */
+            function (callback) {
+                if ( isNew ) {
+                    self.genID('mote:id', callback)
                 } else {
                     callback(null, self.id)
                 }
             },
+
+            /**
+             * Add the Meeting to our Redis List
+             * @param {Int}      ID
+             * @param {Function} callback
+             */
             function (id, callback) {
+
+                // Update our Motes ID
                 self.id = self.props.id = '' + id
 
-                if ( motelikenew ) {
-                    console.log('are you saving asshole?')
-                    // adds the meeting id to a list
+                if ( isNew ) {
                     self.redis.RPUSH('meeting:' + self.props.meeting_id + ':motes', id)
                 }
 
-
-               console.log('agreements not being set yet')
-
-                //console.log(self.props.agree)
-
-                // 'nameone', nametwo, namethree, namefour
-                //  nameone, nametwo, namethree
-
-                //agrees = self.props.agree || ['0']                      
-
-                //self.redis.HMSET( 'mote:' + self.id + ':agrees', agrees )
-
-                var props = _.pick(self.props, ['meeting_id', 'type', 'body', 'created'])
-                self.redis.HMSET('mote:' + self.id, props, callback)
+                // Filter our Properties
+                var clean_props = _.pick(self.props, ['meeting_id', 'type', 'body', 'created'])
+                
+                // Save them
+                self.redis.HMSET('mote:' + self.id, clean_props, callback)
             }
         ],
+        // Should be modified to include a callback
         function(err, results){
-
             if ( err ) {
-
-                console.log( err )
-
+                console.error( err )
             } else {
-                if ( motelikenew ) {
+                if ( isNew ) {
                     self.emit('mote:saved', self)
                 } else {
                     self.emit('mote:updated', self)
@@ -82,28 +103,32 @@ function Mote (attributes, uid) {
         return self
     }
 
-    this.get = function (attribute, callback) {
-        var callback = _.isFunction(attribute) ? attribute : callback
-        var attr     = _.isEmpty(attribute) ? self.props : self.props[attribute]
-        callback(attr)
-    }
 }
 
+// Inherit from our Model
 util.inherits( Mote, Model )
 
+// Mote Factory
 _.assign(Mote, {
-	fetch : function(id, callback) {
-		console.log('Fetching Mote with ID ' + id + ' from Redis')
+
+    /**
+     * Return a Meeting Model
+     * @param {Int}      ID
+     * @param {Function} callback
+     */
+
+    fetch : function(id, callback) {
+        console.log('Fetching Mote with ID ' + id + ' from Redis')
         async.parallel({
             mote: function (callback) {
                 Model.redis.hgetall('mote:' + id, callback)
-            },
+            }/*,
             agrees: function (callback) {
                 Model.redis.hgetall('mote:' + id + ':agrees', callback)
-            }
+            }*/
         },
         function (err, results) {
-            console.log(results)
+            //console.log(results)
             results.mote.agree = results.agrees || []
             callback(err, new Mote(results.mote, id))
             /**
@@ -111,6 +136,6 @@ _.assign(Mote, {
             callback(null, new Mote(attributes, id))
             **/
         })
-		
-	}
+        
+    }
 })

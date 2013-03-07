@@ -13,7 +13,6 @@ var app  = express()
    ,root = path.resolve(__dirname, '../') + '/'     /*  Reference to our Root Directory */
    ,hbs  = exhbs.create({ defaultLayout: 'main' })  /*  Layout default: /views/layouts/main */
 
-
 /**
  * Export Our Application Object
  */
@@ -50,3 +49,8 @@ app.use(express.static(path.join(root, 'public')))
 
 // Application Locals
 app.locals.base_url = '/'
+
+// Log Uncaught exceptions
+process.on('uncaughtException', function (err) {
+  console.error(err.stack)
+})
