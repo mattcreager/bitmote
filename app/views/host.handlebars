@@ -1,9 +1,9 @@
 <header>
     <h1 id="logo">bitmote</h1>
-    <h2><input type="text" id="meeting-title" value="Untitled Meeting"></h2>
+    <h2><input type="text" id="meeting-title" placeholder="Untitled Meeting" value=""></h2>
     <div class="meta">
         <label>host</label>
-        <input type="text" id="meeting-host" placeholder="Darth Vader <dvader@gmail.com>">
+        <input type="text" id="meeting-host" placeholder="Darth Vader <dvader@gmail.com>" value="">
     </div>
     <div class="meta">
         <label>attendees</label>
@@ -11,12 +11,10 @@
     </div>
 </header>
 <div id="contents-container">
-    <h2>minutes <input id="meeting-time" value="started 15 minutes ago"></a></h2>
+    <h2>minutes <input id="meeting-time" value=""></a></h2>
     <!--
     <div class="alert alert-warning">Uh oh... little problem encountered?<a href="#" class="close">x</a><span></div>-->
-    <table>
-        <tbody></tbody>
-    </table>
+    <table id="minutes-table"></table>
 </div>
 <div id="actions-container">
     <div id="meeting-actions">

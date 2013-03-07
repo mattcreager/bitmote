@@ -1,6 +1,17 @@
 var events = require('events'),
 	util   = require('util'),
-	_	   = require('lodash')
+	_	   = require('lodash'),
+     redis = require('redis')
+
+var client = redis.createClient()
+
+client.on("error", function (err) {
+    console.error("Redis experienced the following connection error: " + err)
+})
+
+client.on("ready", function() {
+    console.info('Redis is ready to kick some ass')
+})
 
 exports = module.exports = Model
 
@@ -10,10 +21,22 @@ function Model () {
 
 	var self = this
 
+    self.redis = client
+
+    this.genID = function (key, callback) {
+        client.incr(key, function (err, new_id) {
+            if (err) {
+                console.error(err)
+            } else {
+                callback(null, new_id)
+            }
+        })
+    }
+
 	this.generateUID = function (length) {
 
 		var length = _.isUndefined(length) ? 7 : length
-	    
+
 	    var uid 	 = '',
 			possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
@@ -25,9 +48,12 @@ function Model () {
 	}
 
 	this.save = function () {
-		console.log('model save called')
-		self.emit('model:saved', 'hah')
+		console.warning('Child models must override this.save')
 	}
 }
+
+_.assign(Model, {
+    redis : client
+})
 
 util.inherits(Model, events.EventEmitter)

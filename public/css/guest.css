@@ -4,8 +4,8 @@
 
 @font-face {
     font-family: 'Gill Sans MT';
-    src: url('fonts/GILMT.eot');
-    src: local('☺'), url('fonts/GILMT.woff') format('woff'), url('fonts/GILMT.ttf') format('truetype'), url('fonts/GILMT.svg') format('svg');
+    src: url('/fonts/GILMT.eot');
+    src: local('☺'), url('/fonts/GILMT.woff') format('woff'), url('/fonts/GILMT.ttf') format('truetype'), url('/fonts/GILMT.svg') format('svg');
     font-weight: normal;
     font-style: normal;
 }

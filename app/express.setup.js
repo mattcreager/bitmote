@@ -9,7 +9,6 @@ var app  = express(),
     root = path.resolve(__dirname, '../') + '/',
     hbs  = exhbs.create({defaultLayout: 'main'})
 
-console.log(path.join(root,'public'))
 module.exports = app
 
 process.chdir(__dirname)
@@ -30,6 +29,4 @@ app.use(express.cookieSession({secret: 'p1Y%ygFau7R}vxEgIlp42yp6Mw(F%dkz%f$DN', 
 app.use(app.router)
 app.use(require('less-middleware')({ src: path.join(root,'public') }))
 app.use(express.static(path.join(root, 'public')))
-app.locals.base_url = 'http://ninja:' + app.get('port') + '/'
-//app.use('/test', gzippo.staticGzip(path.join(root, 'test')))
-//app.use('/node_modules', gzippo.staticGzip(path.join(root, 'node_modules')))
+app.locals.base_url = '/'

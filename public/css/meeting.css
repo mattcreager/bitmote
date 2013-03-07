@@ -4,8 +4,8 @@
 
 @font-face {
     font-family: 'Gill Sans MT';
-    src: url('fonts/GILMT.eot');
-    src: local('☺'), url('fonts/GILMT.woff') format('woff'), url('fonts/GILMT.ttf') format('truetype'), url('fonts/GILMT.svg') format('svg');
+    src: url('/fonts/GILMT.eot');
+    src: local('☺'), url('/fonts/GILMT.woff') format('woff'), url('/fonts/GILMT.ttf') format('truetype'), url('/fonts/GILMT.svg') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -122,15 +122,17 @@ header p {
 .moment {
     width: 84%;
     position: relative;
+    padding: 0 1px;
 }
 
 .moment textarea {
-    padding: 10px;
+    padding: 5px 10px;
     overflow: hidden;
     width: 97%;
     max-width: 97%;
     min-width: 97%;
     border: 1px solid white;
+    height: 5px;
 }
 
 .meeting-container table {
@@ -311,6 +313,10 @@ a:hover {
 /* ==========================================================================
 Voting
 ========================================================================== */
+.vote-cell .agree {
+    background-color: green;
+}
+
 .vote-cell, .type-cell {
     position: relative;
     width: 30px;
@@ -356,4 +362,8 @@ Voting
     left: -17px;
     top: -4px;
     color: rgba(190, 230, 229, 1);
+}
+
+#minutes-table {
+    table-layout: fixed;
 }

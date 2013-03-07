@@ -6,16 +6,21 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title></title>
+    <title>Bitmote&trade; - Matt Creager&reg;</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
-    <script>window.base_url = '{{base_url}}'</script>
-    
+    <script>
+        window.base_url = '{{ base_url }}'
+        window.strap    = {{{ strap }}}
+    </script>
+
 
     <link rel="stylesheet" href="{{base_url}}css/normalize.min.css">
     <link rel="stylesheet" href="{{base_url}}css/meeting.css">
-
+    <script src="/socket.io/socket.io.js"></script>
+    <script data-main="{{base_url}}js/main" src="{{base_url}}js/require-jquery.js"></script>
     <script src="{{base_url}}js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+   
 </head>
 <body>
     <!--[if lt IE 7]>
@@ -44,27 +49,22 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+    <script src="{{base_url}}js/vendor/jquery.autosize.min.js"></script>
 
-    <script>
-        var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
-        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-        s.parentNode.insertBefore(g,s)}(document,'script'));
-    </script>
     
-    <!--
-    <div class="modal">
+    <div style="display:none;" class="modal">
         <h3>Need company? Just share this link:</h3>
         <div class="modal-body">
-            <span id="share-link"><a href="#">http://bitmote.com/guest/ghjdofl</a></span>
+            <span id="share-link"><a href="#"></a></span>
         </div>
         <div class="modal-actions">
-            <a class="btn btn-small" href="#">Copy</a>
-            <a class="btn btn-small" href="#">Close</a>
+            <!-- <a id="copy-link" class="btn btn-small" href="#">Copy</a> -->
+            <a class="close-modal btn btn-small" href="#">Close</a>
         </div>
     </div>
-    <div class="modal-backdrop"></div>
-    -->
-    <script data-main="{{base_url}}js/main" src="{{base_url}}js/require-jquery.js"></script>
+    <div style="display:none;" class="modal-backdrop"></div>
+     
+    <script>var socket = io.connect('/meeting/' + window.strap.meeting.id)</script>
+
 </body>
 </html>
