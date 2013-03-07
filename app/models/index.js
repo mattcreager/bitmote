@@ -1,4 +1,13 @@
 
-exports.User = require('./user.js')
+/**
+ * Model Access Convenience
+ */
+
+// User Model
+exports.User    = require('./user.js')
+
+// Meeting Model
 exports.Meeting = require('./meeting.js')
-exports.Mote = require('./mote.js')
+
+// Mote Model
+exports.Mote    = require('./mote.js')

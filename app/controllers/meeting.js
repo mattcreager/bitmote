@@ -1,74 +1,126 @@
-var models = require('../models'),
-	_ 	   = require('lodash'),
-	mSock  = require('../lib/meeting.socket'),
-	async  = require('async')
 
-exports.start = function (req, res) {
-	
-	var userlikenew = _.isUndefined(req.cookies.bmsession) ? true : false
+/**
+ * Module dependencies
+ */
 
-	async.waterfall([
-	    function(callback){
+var async  = require('async') 
+   ,_      = require('lodash')
+   ,models = require('../models')
+   ,mSock  = require('../lib/meeting.socket')
 
-	        if ( userlikenew ) {
-	    		var user = new models.User()
-	    			user.save()
-	    		callback(null, user);
-	        } else {
-	        	models.User.fetch(req.cookies.bmsession, callback)
-	        }	      
 
-	    },
-	    function(user, callback){
+/**
+ * Forwards the host to a meeting which is created
+ * @req {Object} Request
+ * @res {Object} Response
+ */
 
-	    	res.cookie('bmsession', user.id, { expires: new Date(Date.now() + 90000000000) })
+var start = exports.start = function (req, res) {
+    
+    // Check if the user has an outstanding session
+    var newUser = _.isUndefined(req.cookies.bmsession) ? true : false
 
-	    	var meeting = new models.Meeting()
-	    		meeting.set({'host' : user.id})
-				meeting.save()
+    async.waterfall([
 
-			mSock.create(meeting)
+        /**
+         * Forwards the host to a meeting which is created
+         * @req {Function} Callback
+         */
 
-			res.redirect('m/' + meeting.id)
-	       
-	        callback(null, 'two');
-	    }
-	])
+        function (callback) { 
+
+            if ( newUser ) {
+                // Pay forward a new user
+                var user = new models.User()
+                    user.save()
+                callback(null, user);
+            } else {
+                // Pay forward a current user
+                models.User.fetch(req.cookies.bmsession, callback)
+            }         
+
+        },
+
+        /**
+         * Forwards the host to a meeting which is created
+         * @req {Object} User Model
+         */
+
+        function (user, callback) {
+
+            // Set/Refresh the users session
+            res.cookie('bmsession', user.id, { expires: new Date(Date.now() + 90000000000) })
+
+            // Create and persist the meeting
+            var meeting = new models.Meeting()
+                meeting.set({ 'host' : user.id })
+                meeting.save()
+
+            // Add the meeting to our meeting sockets
+            mSock.create(meeting)
+
+            // Direct the user to our shiny new meeting
+            res.redirect('m/' + meeting.id)
+
+            // The waterfall ends
+            callback(null)
+        }
+    ])
 }
 
-exports.host = function (req, res) {
+/**
+ * Main meeting view
+ * @req {Object} Request
+ * @res {Object} Response
+ */
 
-	if (_.isUndefined(req.cookies.bmsession)) return res.redirect('j/' + req.param('meeting_id'))
+var main = exports.main = function (req, res) {
 
-	models.Meeting.fetch(req.param('meeting_id'), function(err, meeting) {
+    // Direct users without a session to join
+    if ( _.isUndefined(req.cookies.bmsession) ) return res.redirect('join/' + req.param('meeting_id'))
 
-		async.parallel({
-			motes: function (callback) {
-				meeting.getMotes(callback)
-			},
-			host: function (callback) {
-				models.User.fetch(meeting.get('host'), callback)
-			},
-			user: function (callback) {
-				models.User.fetch(req.cookies.bmsession, callback)
-			}
-		},
+    // Returns a meeting model for the current meeting
+    models.Meeting.fetch(req.param('meeting_id'),
 
-		function (err, results) {
+        /**
+         * Fetch and render our meeting
+         * @req {Object} err
+         * @res {Object} Meeting Model
+         */
 
-			//results.user.props.agree = [];
+        function (err, meeting) {
 
-			mSock.create(meeting)
+            async.parallel({
+                // Fetch individual meeting motes (rows)
+                motes: function (callback) {
+                    meeting.getMotes(callback)
+                },
+                // Fetch the user model of the meeting host
+                host: function (callback) {
+                    models.User.fetch(meeting.get('host'), callback)
+                },
+                // Fetch the user model of the current user
+                user: function (callback) {
+                    models.User.fetch(req.cookies.bmsession, callback)
+                }
+            },
 
-			res.render('host', {
-				strap : JSON.stringify({
-					meeting : meeting.props, 
-					user: results.user.props,
-					host: results.host.props,
-					motes: results.motes
-				})
-	        }) 
-		})
-	})
+            function (err, results) {
+                if (err) return next(err)
+
+                // Ensure we have a channel associated with this meeting
+                mSock.create(meeting)
+
+                // Render our main template and bootstraps our model properties
+                res.render('host', {
+                    strap : JSON.stringify({
+                        meeting : meeting.props, 
+                        user: results.user.props,
+                        host: results.host.props,
+                        motes: results.motes
+                    })
+                }) 
+            })
+        })
 
 }

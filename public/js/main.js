@@ -40,8 +40,8 @@ require(
     })
 
     Handlebars.registerHelper('youAgree', function(agree) {
-        console.log(agree)
-        console.log( _.intersection(agree, [window.strap.user.id]).length )
+        //console.log(agree)
+        //console.log( _.intersection(agree, [window.strap.user.id]).length )
         if ( _.intersection(agree, [window.strap.user.id]).length === 0 ) {
             return "disagree"
         } else {
@@ -170,7 +170,7 @@ require(
             this.$el.find('#meeting-time').val(started)
         },
         render: function () {
-            var link = "http://www.bitmote.com/g/" + this.model.get('id')
+            var link = "http://www.bitmote.com/m/" + this.model.get('id')
             this.$el.find('#share-link').text(link)
             this.$el.find('#meeting-title').val(this.model.get('subject'))
             this.updateStarted()
@@ -186,11 +186,18 @@ require(
         /*triggers: {
             'click .agree' : 'user:consensus'
         },*/
+        modelEvents: {
+            'change' : 'modelChanged'
+        },
         events: {
             'click .agree, .disagree' : 'toggleAgree',
             'click .type' :  'changeType',
             'keyup textarea' : 'quickChangeBody',
             'change textarea': 'changeBody'
+        },
+        modelChanged: function() {
+            console.log(arguments)
+            console.log('model changed')
         },
         changeType: function (event) {
             event.preventDefault()
@@ -206,13 +213,13 @@ require(
             // Add throttling
             if (event.keyCode === space) {
                 var mote_body = $(event.target).val()
-                this.model.set('body', mote_body)
+                this.model.set('body', mote_body, {silent: true})
                 this.model.save()
             }
         },
         changeBody: function (event) {
             var mote_body = $(event.target).val()
-            this.model.set('body', mote_body)
+            this.model.set('body', mote_body, {slient: true})
             this.model.save()
         },
         toggleAgree: function (event) {
@@ -281,26 +288,36 @@ require(
         var meetingView = new MeetingView({ model: BitMote.meeting_model })
         var hostView    = new HostView({ model: BitMote.meeting_host })
         
-        //*
         socket.on('mote:saved', function(data){
             var model = BitMote.minutes_collection.get(data.temp_id)
-            model.set('id', data.id)
+            model.set('id', data.id, {silent: true})
 
             if ( BitMote.minutes_collection.where({id: 0}).length === 0 ) {
                 BitMote.minutes_collection.add([new Mote()])
             }
         })
 
-        socket.on('meeting:updated', function (data) {
+        
+        socket.on('mote:changed', function (data) {
+            console.log('this doing it?')
+            console.log(data)
+            var mote = BitMote.minutes_collection.get(data.mote.id)
+                mote.set(data)
 
+                console.log(mote)
+        }) 
+    
+        
+        socket.on('mote:new', function (data) {
+            var mote = new Mote(data.mote)
+
+            BitMote.minutes_collection.add(mote)
+            console.log(BitMote.minutes_collection) 
+            $('textarea').autosize()
         })
-        //*/
+        
 
         var minutesTable = new MinutesTable({ collection: BitMote.minutes_collection })
-
-        minutesTable.on('itemview:user:consensus', function(args) {
-
-        })
 
         BitMote.Meeting.attachView(meetingView)
 

@@ -1,7 +1,7 @@
-var events = require('events'),
-	util   = require('util'),
-	_	   = require('lodash'),
-     redis = require('redis')
+var events = require('events')
+   ,util   = require('util')
+   ,_	   = require('lodash')
+   ,redis  = require('redis')
 
 var client = redis.createClient()
 

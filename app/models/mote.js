@@ -61,10 +61,7 @@ function Mote (attributes, uid) {
 
                 //self.redis.HMSET( 'mote:' + self.id + ':agrees', agrees )
 
-                var props = _.omit(self.props, ['agree'])
-                //console.log(props)
-
-                // adds the meeting info to a hash
+                var props = _.pick(self.props, ['meeting_id', 'type', 'body', 'created'])
                 self.redis.HMSET('mote:' + self.id, props, callback)
             }
         ],
