@@ -1,37 +1,60 @@
 <!DOCTYPE html>
+
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Bitmote&trade; - Matt Creager&reg;</title>
-    <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
+
+    <title>Bitmote&trade; - Matt Creager&reg;</title>
+
     <script>
+        // Explictly add some data to the page 
         window.base_url = '{{ base_url }}'
         window.strap    = {{{ strap }}}
     </script>
-
-
     <link rel="stylesheet" href="{{base_url}}css/normalize.min.css">
     <link rel="stylesheet" href="{{base_url}}css/meeting.css">
     <script src="/socket.io/socket.io.js"></script>
     <script data-main="{{base_url}}js/main" src="{{base_url}}js/require-jquery.js"></script>
     <script src="{{base_url}}js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
-   
 </head>
+
 <body>
-    <!--[if lt IE 7]>
-        <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
-    <![endif]-->
+    <div id="ajax-loading">
+        <p>This page may take several seconds to load, please be patient</p>
+
+        <ul class="quotes">
+            <li class="active">Creating a new universe</li>
+            <li>Creating hydrogen</li>
+            <li>Adding hydrogen to the universe</li>
+            <li>Igniting stars</li>
+            <li>Sending background radiation</li>
+            <li>Spawning civilizations</li>
+            <li>Powering up the interdimensional flux capacitors</li>
+            <li>Sending data down the tubes</li>
+            <li>Hmmm, we're still not loaded? Well this is embarassing...</li>
+        </ul>
+    </div>
+
+    <script>
+        // Amuse the user
+        setInterval(function() {
+            var active = $('#ajax-loading .quotes .active')
+
+            if (active.next().length > 0) {
+                active.removeClass('active')
+                active.next().addClass('active')
+            }
+        }, 750);
+    </script>
 
     <div class="meeting-container clearfix">
-
     	{{{ body }}}
-
-    </div> <!-- #main-container -->
+    </div>
 
     {{#if templates}}
     <script>
@@ -50,7 +73,6 @@
     <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
     <script src="/js/vendor/jquery.autosize.min.js"></script>
 
-    
     <div style="display:none;" class="modal">
         <h3>Need company? Just share this link:</h3>
         <div class="modal-body">
@@ -61,8 +83,6 @@
         </div>
     </div>
     <div style="display:none;" class="modal-backdrop"></div>
-     
-    <script>var socket = io.connect('/meeting/' + window.strap.meeting.id)</script>
-
 </body>
+
 </html>

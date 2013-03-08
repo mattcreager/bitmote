@@ -3,11 +3,10 @@
  * Module dependencies
  */
 
-var _       = require('lodash')
-   ,models  = require('../models')
-
-// Meeting ID container
-var meetingIds = [];
+var _          = require('lodash')
+   ,models     = require('../models')
+   ,async      = require('async')
+   ,meetingIds = [];
 
 /**
  * Socket.io Meeting Adapter
@@ -16,7 +15,7 @@ var meetingIds = [];
  * @param {Object} meeting
  */
 
-var create = exports.create = function ( meeting ) {
+var create = exports.create = function (meeting) {
     
     // If a channel has been established for this meeting
     // lets not create another
@@ -52,7 +51,6 @@ var create = exports.create = function ( meeting ) {
                     mote.set(clean_data)
                     mote.save()
                     mote.on('mote:updated', function(mote) {
-                            console.log('mote updated from socket')
                             socket.emit('mote:updated', {success: true})
                             socket.broadcast.emit('mote:changed', mote.props)
                         })
@@ -92,5 +90,49 @@ var create = exports.create = function ( meeting ) {
 
             })
 
-        }) //--  on('connection', function (socket) { --//
+            socket.on('bootstrap', function (data) {
+                async.parallel({
+                    // Fetch individual meeting motes (rows)
+                    motes: function (callback) {
+                        meeting.getMotes(callback)
+                    },
+                    // Fetch meeting attendeeds
+                    attendees: function (callback) {
+                        meeting.getAttendees(callback)
+                    },
+                    // Fetch the user model of the meeting host
+                    host: function (callback) {
+                        models.User.fetch(meeting.get('host'), callback)
+                    },
+                    // Fetch the user model of the current user
+                    user: function (callback) {
+                        models.User.fetch(data.user.id, callback)
+                    }
+                }, 
+                function (err, results) {
+                    if (err) console.log(err)
+
+                    var motes     = []
+                      , attendees = []
+
+                    _.each(results.motes, function(mote) {
+                        motes.push(mote.props);
+                    })
+
+                    _.each(results.attendees, function(attendee) {
+                        attendees.push(attendee.props);
+                    })
+
+                    // Send the client the latest data to bootstrap everything on the page with
+                    socket.emit('bootstrap:data', {
+                        meeting  : meeting.props, 
+                        user     : results.user.props,
+                        host     : results.host.props,
+                        motes    : motes,
+                        attendees: attendees
+                    });
+                }
+            )
+        })  
+    }) //--  on('connection', function (socket) { --//
 }

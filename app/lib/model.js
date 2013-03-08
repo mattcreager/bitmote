@@ -37,9 +37,7 @@ function Model () {
 
     // Super constuctor
     events.EventEmitter.call(this)
-
-    console.log(arguments)
-
+    
     // Local references
     var self       = this
         self.redis = client

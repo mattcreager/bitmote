@@ -91,14 +91,6 @@ var main = exports.main = function (req, res) {
         function (err, meeting) {
 
             async.parallel({
-                // Fetch individual meeting motes (rows)
-                motes: function (callback) {
-                    meeting.getMotes(callback)
-                },
-                // Fetch meeting attendeeds
-                attendees: function (callback) {
-                    meeting.getAttendees(callback)
-                },
                 // Fetch the user model of the meeting host
                 host: function (callback) {
                     models.User.fetch(meeting.get('host'), callback)
@@ -116,30 +108,16 @@ var main = exports.main = function (req, res) {
                 if (results.user.get('id') != results.host.get('id') && results.user.get('name') === '') {
                     res.redirect('join/' + req.param('meeting_id'))
                 }
-console.log('===========================================');
-console.log(results.attendees);
+
                 // Ensure we have a channel associated with this meeting
                 mSock.create(meeting)
-
-                var motes     = []
-                  , attendees = []
-
-                _.each(results.motes, function(mote) {
-                    motes.push(mote.props);
-                })
-
-                _.each(results.attendees, function(attendee) {
-                    attendees.push(attendee.props);
-                })
 
                 // Render our main template and bootstraps our model properties
                 res.render('host', {
                     strap : JSON.stringify({
                         meeting : meeting.props, 
                         user: results.user.props,
-                        host: results.host.props,
-                        motes: motes,
-                        attendees: attendees
+                        host: results.host.props
                     })
                 }) 
             })

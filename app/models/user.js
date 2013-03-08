@@ -55,7 +55,6 @@ util.inherits(User, Model)
 // User Factory
 _.assign(User, {
     fetch : function (id, callback) {
-        console.log('Fetching User with ID ' + id + ' from Redis')
         Model.redis.hgetall('user:' + id, function (err, attributes) {
             callback(null, new User(attributes, id))
         })

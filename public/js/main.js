@@ -1,3 +1,12 @@
+/*
+ * This file is part of the BitMote application.
+ *
+ * (c) Matthew Creager <matt@symptom6.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 require.config({
 
     paths : {
@@ -12,6 +21,7 @@ require.config({
         'User.model'           : window.base_url + 'js/modules/user.model',
         'Meeting.model'        : window.base_url + 'js/modules/meeting.model',
         'Mote.model'           : window.base_url + 'js/modules/mote.model',
+        'Host.view'      : window.base_url + 'js/modules/host.view',
         'handlebars.helpers'   : window.base_url + 'js/modules/handlebars.helpers'
     },
 
@@ -31,7 +41,7 @@ require.config({
 })
 
 require(
-    ['backbone.marionette', 'moment', 'User.model', 'Meeting.model', 'Mote.model', 'handlebars'], 
+    ['backbone.marionette', 'moment', 'User.model', 'Host.view', 'Meeting.model', 'Mote.model', 'handlebars'], 
     
     /**
      * Socket.io Meeting Adapter
@@ -39,7 +49,7 @@ require(
      * This adapter centralizes the socket setup, configuration & events in BitMote
      * @param {Objects} Dependencies
      */
-    function (Marionette, moment, User, Meeting, Mote, Handlebars) {
+    function (Marionette, moment, User, HostView, Meeting, Mote, Handlebars) {
 
     // Instantiate our Marionette Application
     var BitMote = new Backbone.Marionette.Application()
@@ -75,59 +85,24 @@ require(
     var Users   = Backbone.Collection.extend({ model: User })
 
     /**
-     * COLLECTIONS
+     * User View
+     * Manages the view for an individual User or Attendee
      */
     var UserView = Backbone.Marionette.ItemView.extend({
         template: Handlebars.templates.attendee,
         tagName: 'li'
     })
 
+    /**
+     * Attendees View
+     * Manages the view for our collection of Users or Attendees
+     */
     var AttendeesView = Backbone.Marionette.CollectionView.extend({
         tagName: 'ul',
         itemView: UserView
     })
 
-    var HostView = Backbone.Marionette.ItemView.extend({
-        initialize: function () {
-            data = {host: window.strap.host, isHost: window.strap.host.id == window.strap.user.id}
-            this.$el.html(Handlebars.templates.host(data))
-            this.renderHost()
-        },
-        el: '#host-container',
-        events: {
-            'blur #meeting-host' : 'changeHost'
-        },
-        modelEvents: {
-            'socket:update' : 'modelChanged'
-        },
-        modelChanged: function() {
-            this.renderHost()
-        },
-        changeHost: function (event) {
-            var host = $(event.target).val()
-
-            var parts = host.match(/(.*?) <(.*?)>/)
-
-            if ( parts && parts.length === 3 ) {
-                this.model.set({name: parts[1], email: parts[2]})
-            } else {
-                this.model.set({name: host, email: ''})
-            }
-            this.model.save()
-        },
-        renderHost: function () {
-
-            var host = this.model.get('name')
-
-            if ( ! _.isEmpty(this.model.get('email') ) ) {
-                host += ' <' + this.model.get('email') + '>'
-            }
-
-            this.$el.find('#meeting-host').val(host)
-            this.$el.find('#meeting-host').text(host)
-        }
-    })
-
+    
     var MeetingView = Backbone.Marionette.ItemView.extend({
         initialize: function () {
             //data = {host: window.strap.host, isHost: window.strap.host.id == window.strap.user.id}
@@ -161,9 +136,18 @@ require(
         },
         changeTime: function(event) {
             var started = moment($(event.target).val())
-            $(event.target).val(moment(started).fromNow())
-            this.model.set('started', started.format("YYYY-MM-DD HH:mm:ss"))
-            this.model.save()
+
+            if (started.isValid()) {
+                $(event.target).val(moment(started).fromNow())
+                this.model.set('started', started.format("YYYY-MM-DD HH:mm:ss"))
+                this.model.save()
+            } else if (moment(this.model.get('started')).isValid()) {
+                $(event.target).val(moment(this.model.get('started')).fromNow())
+            } else {
+                this.model.set('started', moment().format("YYYY-MM-DD HH:mm:ss"))
+                this.model.save()
+                $(event.target).val(moment().fromNow())
+            }
         },
         changeTimeFormat: function(event) {
             var started = this.model.get('started')
@@ -187,7 +171,9 @@ require(
             this.listenTo(this.model, 'change:type', this.updateTypeView)
         },
         onRender: function() {
-            this.$el.find('textarea').autosize()
+            if (this.$el.find('textarea').length > 0) {
+                this.$el.find('textarea').autosize()
+            }
         },
         template: Handlebars.templates.mote_row,
         modelEvents: {
@@ -381,10 +367,17 @@ require(
 
     })
 
-    BitMote.start();
-
-
+    var socket = io.connect('/meeting/' + window.strap.meeting.id)
+    socket.on('connect', function() {
+        socket.emit('bootstrap', window.strap)
+        socket.on('bootstrap:data', function(data) {
+            window.strap = data
+            BitMote.start()
+            $('#ajax-loading').hide()
+        })
+    })
 })
+
 function getTextNodesIn(node) {
     var textNodes = [];
     if (node.nodeType == 3) {

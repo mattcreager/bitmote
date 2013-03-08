@@ -124,7 +124,6 @@ _.assign(Mote, {
      */
 
     fetch : function(id, callback) {
-        console.log('Fetching Mote with ID ' + id + ' from Redis')
         async.parallel({
             mote: function (callback) {
                 Model.redis.HGETALL('mote:' + id, callback)
@@ -134,7 +133,6 @@ _.assign(Mote, {
             }
         },
         function (err, results) {
-            //console.log(results)
             results.mote.agree = results.agrees || []
             callback(err, new Mote(results.mote, id))
             /**
