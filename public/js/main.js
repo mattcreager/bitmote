@@ -49,7 +49,7 @@ require(
 
     Backbone.sync = function(method, model, options, error) {
 
-        if ( ! model.pendingCreation ) {
+        if ( ! model.get('pendingCreation') ) {
             
             // is this a create event
             if ( method == 'create' ) {
@@ -213,7 +213,7 @@ require(
 
             var mote_body = $(event.target).val()
             this.model.set('body', mote_body, {silent: true})
-            this.model.save()
+            
         },
         changeBody: function (event) {
             var mote_body = $(event.target).val()
