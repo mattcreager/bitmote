@@ -144,12 +144,14 @@ header p {
     padding: 0 1px;
 }
 
+
+
 textarea {
     padding: 5px 10px;
     overflow: hidden;
-    width: 714px;
-    max-width: 714px;
-    min-width: 714px;
+    width: 705px;
+    max-width: 705px;
+    min-width: 705px;
     border: 1px solid white;
     height: 5px;
     line-height: 20px;
@@ -159,7 +161,7 @@ textarea {
     width: 100%;
     font-size: 17px;
     border-collapse: separate;
-    border-spacing: 0 4px;
+    border-spacing: 0 6px;
 }
 
 .meeting-container table tr td {
@@ -361,12 +363,14 @@ Voting
 }
 
 .vote-cell .percent-agree {
+    opacity: 0.7;
     position: absolute;
     right: 100%;
-    top: 4px;
+    top: -4px;
+    font-size: 14px;
     text-align: right;
     padding: 0 10px 0 0;
-    color: #aaa;
+    color: #FF4636;
 }
 
 .vote-cell, .type-cell {

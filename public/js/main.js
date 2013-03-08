@@ -1,84 +1,82 @@
 require.config({
 
-  paths : {
-    backbone :   window.base_url + 'js/vendor/backbone.min',
-    underscore : window.base_url + 'js/vendor/lodash.min',
-    moment  : window.base_url + 'js/vendor/moment.min',
-    handlebars : window.base_url + 'js/vendor/handlebars.runtime',
-    'backbone.marionette' : window.base_url + 'js/vendor/marionette.min',
-    'backbone.wreqr' : window.base_url + 'js/vendor/backbone.wreqr.min',
-    'backbone.eventbinder' : window.base_url + 'js/vendor/backbone.eventbinder.min',
-    'backbone.babysitter' : window.base_url + 'js/vendor/backbone.babysitter.min',
-    'User.model' : window.base_url + 'js/modules/user.model',
-    'Meeting.model' :  window.base_url + 'js/modules/meeting.model',
-    'Mote.model' :  window.base_url + 'js/modules/mote.model',
-    'handlebars.helpers' : window.base_url + 'js/modules/handlebars.helpers'
-  },
+    paths : {
+        backbone               : window.base_url + 'js/vendor/backbone.min',
+        underscore             : window.base_url + 'js/vendor/lodash.min',
+        moment                 : window.base_url + 'js/vendor/moment.min',
+        handlebars             : window.base_url + 'js/vendor/handlebars.runtime',
+        'backbone.marionette'  : window.base_url + 'js/vendor/marionette.min',
+        'backbone.wreqr'       : window.base_url + 'js/vendor/backbone.wreqr.min',
+        'backbone.eventbinder' : window.base_url + 'js/vendor/backbone.eventbinder.min',
+        'backbone.babysitter'  : window.base_url + 'js/vendor/backbone.babysitter.min',
+        'User.model'           : window.base_url + 'js/modules/user.model',
+        'Meeting.model'        : window.base_url + 'js/modules/meeting.model',
+        'Mote.model'           : window.base_url + 'js/modules/mote.model',
+        'handlebars.helpers'   : window.base_url + 'js/modules/handlebars.helpers'
+    },
 
-  shim : {
-    moment : {
-        exports: 'moment'
-    },
-    underscore : {
-      exports : '_'
-    },
-    handlebars : {
-        exports: 'Handlebars'
-    },
-    backbone : {
-      deps : ['jquery', 'underscore'],
-      exports : 'Backbone'
-    },
-    'backbone.marionette' : {
-      deps : ['handlebars.helpers', 'jquery', 'underscore', 'backbone', 'backbone.wreqr', 'backbone.eventbinder', 'backbone.babysitter'],
-      exports : 'Marionette'
+    shim : {
+        moment     : { exports: 'moment' },
+        underscore : { exports : '_' },
+        handlebars : { exports: 'Handlebars'  },
+        backbone   : {
+            deps    : ['jquery', 'underscore'],
+            exports : 'Backbone'
+        },
+        'backbone.marionette' : {
+            deps    : ['handlebars.helpers', 'jquery', 'underscore', 'backbone', 'backbone.wreqr', 'backbone.eventbinder', 'backbone.babysitter'],
+            exports : 'Marionette'
+        }
     }
-  }
 })
 
 require(
     ['backbone.marionette', 'moment', 'User.model', 'Meeting.model', 'Mote.model', 'handlebars'], 
+    
+    /**
+     * Socket.io Meeting Adapter
+     * 
+     * This adapter centralizes the socket setup, configuration & events in BitMote
+     * @param {Objects} Dependencies
+     */
     function (Marionette, moment, User, Meeting, Mote, Handlebars) {
 
     // Instantiate our Marionette Application
     var BitMote = new Backbone.Marionette.Application()
 
-    // We hack the render function because
-    // we're using pre-compiled templates
-    Backbone.Marionette.Renderer.render = function (template, data) {
-        return template(data)
+    /**
+     * Marionette Render function is hacked to use pre-compiled
+     */
+    Backbone.Marionette.Renderer.render = function (template, data) { return template(data) }
+
+    /**
+     * Backbone Sync function is hacked to work with Socket.io
+     */
+    Backbone.sync = function (method, model, options, error) {
+        
+        if ( model.has('pendingCreation') && model.get('pendingCreation') ) return;
+
+        // Set a temporary client ID
+        if ( method == 'create' ) {
+            model.set('temp_id', model.cid)
+            model.set('pendingCreation', true)
+        }
+
+        // We use the model URL (example: mote) along with
+        // a method (example: create) to sync updates with the server
+        socket.emit(this.urlRoot + ':' + method, model.toJSON())
+
     }
 
+    /**
+     * Create our Collection Constructors
+     */
+    var Minutes = Backbone.Collection.extend({ model: Mote })
+    var Users   = Backbone.Collection.extend({ model: User })
 
-    Backbone.sync = function(method, model, options, error) {
-
-        if ( ! model.get('pendingCreation') ) {
-            
-            // is this a create event
-            if ( method == 'create' ) {
-
-                console.log('we are creating a mote')
-                model.set('temp_id', model.cid)
-                model.set('pendingCreation', true)
-            }
-
-            socket.emit(this.urlRoot + ':' + method, model.toJSON())
-
-        } else {
-
-            console.log('creation in progress, no save triggered')
-        }   
-           
-    }
-
-    var Minutes = Backbone.Collection.extend({
-        model: Mote
-    })
-
-    var Users = Backbone.Collection.extend({
-        model: User
-    })
-
+    /**
+     * COLLECTIONS
+     */
     var UserView = Backbone.Marionette.ItemView.extend({
         template: Handlebars.templates.attendee,
         tagName: 'li'
@@ -216,12 +214,11 @@ require(
 
             var mote_body = $(event.target).val()
             this.model.set('body', mote_body, {silent: true})
-            
+            this.model.save()
         },
         changeBody: function (event) {
             var mote_body = $(event.target).val()
             this.model.set('body', mote_body, {silent: true})
-            this.model.save()
         },
         toggleAgree: function (event) {
             event.preventDefault()
