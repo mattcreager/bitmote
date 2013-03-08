@@ -1,10 +1,19 @@
 {
-  "name": "application-name",
-  "version": "0.0.1",
+  "name": "bitmote",
+  "version": "0.1.0",
+  "author": "Matt Creager <matt@symptom6.com>",
+  "description": "Real-time meeting minutes collaboration tool",
+  "contributors": [
+      {
+          "name": "Matt Creager",
+          "email": "matt@symptom6.com"
+      }
+  ],
   "private": true,
   "scripts": {
     "start": "node app"
   },
+  "license": "MIT",
   "dependencies": {
     "express": "3.1.0",
     "less-middleware": "*",
@@ -13,7 +22,6 @@
     "express3-handlebars": "~0.3.2",
     "socket.io": "~0.9.13",
     "redis": "~0.8.2",
-    "moment": "~2.0.0",
-    "debug" : "*"
+    "moment": "~2.0.0"
   }
 }
