@@ -95,6 +95,10 @@ var main = exports.main = function (req, res) {
                 motes: function (callback) {
                     meeting.getMotes(callback)
                 },
+                // Fetch meeting attendeeds
+                attendees: function (callback) {
+                    meeting.getAttendees(callback)
+                },
                 // Fetch the user model of the meeting host
                 host: function (callback) {
                     models.User.fetch(meeting.get('host'), callback)
@@ -106,10 +110,27 @@ var main = exports.main = function (req, res) {
             },
 
             function (err, results) {
-                if (err) return next(err)
+                if (err) console.log(err)
 
+                // Kick the user to the join page if they aren't the host and have no name
+                if (results.user.get('id') != results.host.get('id') && results.user.get('name') === '') {
+                    res.redirect('join/' + req.param('meeting_id'))
+                }
+console.log('===========================================');
+console.log(results.attendees);
                 // Ensure we have a channel associated with this meeting
                 mSock.create(meeting)
+
+                var motes     = []
+                  , attendees = []
+
+                _.each(results.motes, function(mote) {
+                    motes.push(mote.props);
+                })
+
+                _.each(results.attendees, function(attendee) {
+                    attendees.push(attendee.props);
+                })
 
                 // Render our main template and bootstraps our model properties
                 res.render('host', {
@@ -117,7 +138,8 @@ var main = exports.main = function (req, res) {
                         meeting : meeting.props, 
                         user: results.user.props,
                         host: results.host.props,
-                        motes: results.motes
+                        motes: motes,
+                        attendees: attendees
                     })
                 }) 
             })

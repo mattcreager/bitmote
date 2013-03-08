@@ -34,22 +34,21 @@
     </div> <!-- #main-container -->
 
     {{#if templates}}
-    <script src="{{base_url}}js/vendor/handlebars.runtime.js"></script>
     <script>
-        (function () {
+        function bootstrapHandleBarTemplates() {
             var template  = Handlebars.template,
                 templates = Handlebars.templates = Handlebars.templates || {};
 
           {{#templates}}
             templates['{{{name}}}'] = template({{{template}}});
           {{/templates}}
-        }());
+        }
     </script>
     {{/if}}
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
-    <script src="{{base_url}}js/vendor/jquery.autosize.min.js"></script>
+    <script src="/js/vendor/jquery.autosize.min.js"></script>
 
     
     <div style="display:none;" class="modal">
@@ -58,7 +57,6 @@
             <span id="share-link"><a href="#"></a></span>
         </div>
         <div class="modal-actions">
-            <!-- <a id="copy-link" class="btn btn-small" href="#">Copy</a> -->
             <a class="close-modal btn btn-small" href="#">Close</a>
         </div>
     </div>

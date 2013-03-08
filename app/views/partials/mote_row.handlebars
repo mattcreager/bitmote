@@ -1,5 +1,8 @@
 <td class="vote-cell">
-    <a href="#" data-agree="{{consensus}}" class="{{youAgree agree}}">^</a>
+    <div>
+        <span class="percent-agree">{{consensusPercent agree.length attendees}}</span>
+        <a href="#" data-agree="{{youAgree agree}}" class="{{youAgree agree}}">^</a>
+    </div>
 </td>
 <td class="moment"><textarea>{{body}}</textarea></td>
 <td class="type-cell">

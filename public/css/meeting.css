@@ -28,11 +28,15 @@ input {
 #logo {
     float: right;
     background: url(../img/logo.png) no-repeat center center;
-    height: 63px;
+    margin: -12px 0 0;
+}
+
+#logo, #logo a {
     text-indent: -9999px;
     overflow: hidden;
+    display: block;
     width: 151px;
-    margin: -12px 0 0;
+    height: 63px;
 }
 
 #meeting-title {
@@ -46,6 +50,21 @@ input {
 #meeting-title:hover,
 #meeting-title:focus {
     border: 1px solid #9cd9d8;
+}
+
+#attendees-container ul {
+    display: inline;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+#attendees-container ul li {
+    display: inline;
+}
+
+#attendees-container ul li:last-child .sep {
+    display: none;
 }
 
 #contents-container h2 {
@@ -125,7 +144,7 @@ header p {
     padding: 0 1px;
 }
 
-.moment textarea {
+textarea {
     padding: 5px 10px;
     overflow: hidden;
     width: 97%;
@@ -133,6 +152,7 @@ header p {
     min-width: 97%;
     border: 1px solid white;
     height: 5px;
+    line-height: 20px;
 }
 
 .meeting-container table {
@@ -176,7 +196,7 @@ a {
     font-size: 18px;
     color: #471219;
     text-decoration: none;
-    border-bottom: dashed 1px #471219;
+    border-bottom: dotted 1px #471219;
 }
 
 a:hover {
@@ -204,6 +224,20 @@ a:hover {
 .meta input:hover,
 .meta input:focus {
     border: 1px solid #9cd9d8;
+}
+
+.meta .is-host {
+    background-color: #3A87AD;
+    color: #fff;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+    float: right;
+    padding: 2px 4px 3px;
+    margin-top: 8px;
+    line-height: 14px;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+    vertical-align: baseline;
 }
 
 .meta span {
@@ -313,8 +347,22 @@ a:hover {
 /* ==========================================================================
 Voting
 ========================================================================== */
+
+.vote-cell div {
+    position: relative;
+}
+
 .vote-cell .agree {
     background-color: green;
+}
+
+.vote-cell .percent-agree {
+    position: absolute;
+    right: 100%;
+    top: 4px;
+    text-align: right;
+    padding: 0 10px 0 0;
+    color: #aaa;
 }
 
 .vote-cell, .type-cell {
@@ -356,8 +404,6 @@ Voting
 
 
 .vote-cell a:before {
-    content: counter(item) ' ';
-    counter-increment: item;
     position: absolute;
     left: -17px;
     top: -4px;

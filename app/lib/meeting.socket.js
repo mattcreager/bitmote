@@ -52,8 +52,9 @@ var create = exports.create = function ( meeting ) {
                     mote.set(clean_data)
                     mote.save()
                     mote.on('mote:updated', function(mote) {
+                            console.log('mote updated from socket')
                             socket.emit('mote:updated', {success: true})
-                            socket.broadcast.emit('mote:changed', {mote: mote.props})
+                            socket.broadcast.emit('mote:changed', mote.props)
                         })
                 })
             })
@@ -62,20 +63,33 @@ var create = exports.create = function ( meeting ) {
             socket.on('meeting:update', function (data, callback) {
                 meeting.set(data)
                 meeting.save()
-                meeting.on('meeting:updated', function (meeting) {
+                meeting.once('meeting:updated', function (meeting) {
                     socket.emit('meeting:updated', { success: true })
+                    socket.broadcast.emit('meeting:changed', meeting.props)
                 })
             })
 
             // Update an existing User
             socket.on('user:update', function (data, callback) {
-                models.User.fetch(data.id, function(err, user) {
+                models.User.fetch(data.id, function (err, user) {
+                    user.on('user:updated', function (user) {
+                        socket.broadcast.emit('user:updated', user.props)
+                    })
                     user.set(data)
                     user.save()
-                    user.on('user:updated', function (user) {
-                        socket.emit('user:updated', { success: true })
-                    })
                 })
+            })
+
+            socket.on('user:joined', function (data) {
+
+                models.User.fetch(data.user, function (err, user) {
+                    meeting.once('meeting:newUser', function (user) {
+                        socket.broadcast.emit('meeting:newUser', { user: user.props })
+                    })
+
+                    meeting.addAttendee(user)
+                })
+
             })
 
         }) //--  on('connection', function (socket) { --//

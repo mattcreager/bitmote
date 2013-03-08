@@ -81,6 +81,12 @@ function Mote (attributes, uid) {
                     self.redis.RPUSH('meeting:' + self.props.meeting_id + ':motes', id)
                 }
 
+                self.redis.DEL('mote:' + id + ':consensus', 0, -1)
+
+                _.each(self.props.agree, function (uid) {
+                    self.redis.SADD('mote:' + id + ':consensus', uid)
+                })
+
                 // Filter our Properties
                 var clean_props = _.pick(self.props, ['meeting_id', 'type', 'body', 'created'])
                 
@@ -121,11 +127,11 @@ _.assign(Mote, {
         console.log('Fetching Mote with ID ' + id + ' from Redis')
         async.parallel({
             mote: function (callback) {
-                Model.redis.hgetall('mote:' + id, callback)
-            }/*,
+                Model.redis.HGETALL('mote:' + id, callback)
+            },
             agrees: function (callback) {
-                Model.redis.hgetall('mote:' + id + ':agrees', callback)
-            }*/
+                Model.redis.SMEMBERS('mote:' + id + ':consensus', callback)
+            }
         },
         function (err, results) {
             //console.log(results)

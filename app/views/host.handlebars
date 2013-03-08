@@ -1,13 +1,10 @@
 <header>
-    <h1 id="logo">bitmote</h1>
+    <h1 id="logo"><a href="/">bitmote</a></h1>
     <h2><input type="text" id="meeting-title" placeholder="Untitled Meeting" value=""></h2>
-    <div class="meta">
-        <label>host</label>
-        <input type="text" id="meeting-host" placeholder="Darth Vader <dvader@gmail.com>" value="">
-    </div>
-    <div class="meta">
+    <div class="meta" id="host-container"></div>
+    <div class="meta" id="attendees-container">
         <label>attendees</label>
-        <span><a href="#">Darth Vader</a> <a href="#">Luke Skywalker</a></span>
+        <span id="attendees"></span>
     </div>
 </header>
 <div id="contents-container">
