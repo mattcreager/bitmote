@@ -28,20 +28,19 @@ var create = exports.create = function (meeting) {
     var MeetingSocket = require('../lib/sockets').server
         .of('/meeting/' + meeting.id)
         .on('connection', function (socket) {
-
             // Create a new Mote & return the meetings ID
             // TODO: temp_id -> cID
             socket.on('mote:create', function (data, callback) {
 
                 // TempID is a Client ID
                 var temp_id = data.temp_id,
-                    mote = new models.Mote(_.omit(data, 'temp_id'))
-                    mote.save()
-                    mote.on('mote:saved', function(mote) {
-                        socket.emit('mote:saved', {id: mote.id, temp_id: temp_id})
-                        socket.broadcast.emit('mote:new', {mote: mote.props})
-                    })
-
+                    mote    = new models.Mote(_.omit(data, 'temp_id'))
+                    
+                mote.save()
+                mote.on('mote:saved', function(mote) {
+                    socket.emit('mote:saved', {id: mote.id, temp_id: temp_id})
+                    socket.broadcast.emit('mote:new', {mote: mote.props})
+                })
             })
 
             // Update an existing Mote
@@ -51,9 +50,9 @@ var create = exports.create = function (meeting) {
                     mote.set(clean_data)
                     mote.save()
                     mote.on('mote:updated', function(mote) {
-                            socket.emit('mote:updated', {success: true})
-                            socket.broadcast.emit('mote:changed', mote.props)
-                        })
+                        socket.emit('mote:updated', {success: true})
+                        socket.broadcast.emit('mote:changed', mote.props)
+                    })
                 })
             })
 
@@ -78,8 +77,8 @@ var create = exports.create = function (meeting) {
                 })
             })
 
+            // Broadcast a message to everyone when a new user joins the meeting
             socket.on('user:joined', function (data) {
-
                 models.User.fetch(data.user, function (err, user) {
                     meeting.once('meeting:newUser', function (user) {
                         socket.broadcast.emit('meeting:newUser', { user: user.props })
@@ -87,9 +86,9 @@ var create = exports.create = function (meeting) {
 
                     meeting.addAttendee(user)
                 })
-
             })
 
+            // Called by clients when they first load the page, bootstraps data about the meeting
             socket.on('bootstrap', function (data) {
                 async.parallel({
                     // Fetch individual meeting motes (rows)
@@ -112,6 +111,7 @@ var create = exports.create = function (meeting) {
                 function (err, results) {
                     if (err) console.log(err)
 
+                    // Get the simple properties for each model 
                     var motes     = []
                       , attendees = []
 

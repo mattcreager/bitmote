@@ -14,18 +14,14 @@ var events = require('events')
 
 exports = module.exports = Model
 
-
 // Connect to Redis
 var client = redis.createClient()
     
-    client.on("error", function (err) {
-        console.error("Redis experienced the following connection error: " + err)
-    })
-
-    client.on("ready", function() {
-        console.info('Redis is ready to kick some ass')
-    })
-
+client.on('error', function (err) {
+    console.error('Unable to connect to Redis: ' + err)
+    console.error('Stopping BitMote, please ensure Redis is running')
+    process.abort()
+})
 
 /**
  * Model Constructor
@@ -37,7 +33,7 @@ function Model () {
 
     // Super constuctor
     events.EventEmitter.call(this)
-    
+
     // Local references
     var self       = this
         self.redis = client
