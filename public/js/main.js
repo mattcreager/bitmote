@@ -40,8 +40,11 @@ require(
     ['backbone.marionette', 'moment', 'User.model', 'Meeting.model', 'Mote.model', 'handlebars'], 
     function (Marionette, moment, User, Meeting, Mote, Handlebars) {
 
+    // Instantiate our Marionette Application
     var BitMote = new Backbone.Marionette.Application()
 
+    // We hack the render function because
+    // we're using pre-compiled templates
     Backbone.Marionette.Renderer.render = function (template, data) {
         return template(data)
     }

@@ -147,9 +147,9 @@ header p {
 textarea {
     padding: 5px 10px;
     overflow: hidden;
-    width: 97%;
-    max-width: 97%;
-    min-width: 97%;
+    width: 714px;
+    max-width: 714px;
+    min-width: 714px;
     border: 1px solid white;
     height: 5px;
     line-height: 20px;
@@ -226,18 +226,22 @@ a:hover {
     border: 1px solid #9cd9d8;
 }
 
-.meta .is-host {
-    background-color: #3A87AD;
+.meta .is-host, .meta .is-guest {
+    background-color: #F00;
     color: #fff;
-    border-radius: 3px;
+    border-radius: 1px;
     font-size: 12px;
     font-weight: bold;
     float: right;
     padding: 2px 4px 3px;
     margin-top: 8px;
     line-height: 14px;
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     vertical-align: baseline;
+}
+
+.meta .is-guest {
+    background-color: #DEDB43;
+    color: #231F20;
 }
 
 .meta span {
