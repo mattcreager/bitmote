@@ -48,8 +48,24 @@ require(
 
 
     Backbone.sync = function(method, model, options, error) {
-        model.set('temp_id', model.cid)
-        socket.emit(this.urlRoot + ':' + method, model.toJSON())
+
+        if ( ! model.pendingCreation ) {
+            
+            // is this a create event
+            if ( method == 'create' ) {
+
+                console.log('we are creating a mote')
+                model.set('temp_id', model.cid)
+                model.set('pendingCreation', true)
+            }
+
+            socket.emit(this.urlRoot + ':' + method, model.toJSON())
+
+        } else {
+
+            console.log('creation in progress, no save triggered')
+        }   
+           
     }
 
     var Minutes = Backbone.Collection.extend({
@@ -290,9 +306,10 @@ require(
         var meetingView = new MeetingView({ model: BitMote.meeting_model })
         var hostView    = new HostView({ model: BitMote.meeting_host })
 
-        socket.on('mote:saved', function(data){
+        socket.on('mote:saved', function(data) {
             var model = BitMote.minutes_collection.get(data.temp_id)
             model.set('id', data.id)
+            model.set('pendingCreation', false)
 
             if ( BitMote.minutes_collection.where({id: 0}).length === 0 ) {
                 BitMote.minutes_collection.add([new Mote({agree: [], attendees: BitMote.attendees.length + 1})])
